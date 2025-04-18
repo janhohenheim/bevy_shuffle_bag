@@ -17,7 +17,7 @@ enum DamageModifier {
 
 fn setup(mut commands: Commands) {
     // Spawn the shuffle bag.
-    let mut rng = rand::rng();
+    let mut rng = rand::thread_rng();
 
     commands.spawn(
         ShuffleBag::try_new(
@@ -52,7 +52,7 @@ fn pick(
     mut text: Single<&mut TextSpan, With<PickText>>,
 ) {
     // Pick a number from the shuffle bag. This is guaranteed to never pick the same number twice in a row.
-    let pick = shuffle_bag.pick(&mut rand::rng());
+    let pick = shuffle_bag.pick(&mut rand::thread_rng());
     let damage = match pick {
         DamageModifier::CriticalHit => "20 (Critical hit!)",
         DamageModifier::Normal => "10",
