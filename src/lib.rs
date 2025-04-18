@@ -38,6 +38,7 @@ impl<T> ShuffleBag<T> {
     pub fn shuffle_new_draft(&mut self, rng: &mut impl Rng) {
         self.current_draft = (0..self.full_collection.len()).collect();
         self.current_draft.shuffle(rng);
+
         if self.current_draft.len() <= 1 {
             return;
         }
@@ -53,17 +54,19 @@ impl<T> ShuffleBag<T> {
         // Looks like we picked the same item twice in a row, so let's shuffle it into the middle of the draft.
         let max_index = self.current_draft.len() - 2;
         let index = rng.random_range(0..=max_index);
+        // Swap the this item with the last item in the draft.
         let new_next_pick = self.current_draft.swap_remove(index);
         self.current_draft.push(new_next_pick);
     }
 
     pub fn pick(&mut self, rng: &mut impl Rng) -> &T {
         let pick = self.current_draft.pop().unwrap();
+        self.last_pick = Some(pick);
+
         if self.current_draft.is_empty() {
             self.shuffle_new_draft(rng);
         }
 
-        self.last_pick = Some(pick);
         &self.full_collection[pick]
     }
 
