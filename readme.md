@@ -3,7 +3,7 @@
 [![crates.io](https://img.shields.io/crates/v/bevy_shuffle_bag)](https://crates.io/crates/bevy_shuffle_bag)
 [![docs.rs](https://docs.rs/bevy_shuffle_bag/badge.svg)](https://docs.rs/bevy_shuffle_bag)
 
-A tiny crate providing a shuffle bag, which is a collection of items that can be picked in a random order.
+A tiny crate providing a shuffle bag, which is a collection of items that can be picked in a random, nonrepeating order.
 
 The bag will be emptied in *drafts*, where each draft contains all the items in the bag, but in a random order.
 This means that if you have e.g. a bag with 3 soundtracks, all of them will play once in a random order, and then the bag will be refilled with the same soundtracks in a random order.
@@ -25,6 +25,7 @@ let loot = treasure_chest.pick(&mut rng);
 println!("I just picked up a {loot}!");
 ```
 
+No need to add any plugin, this crate only brings in a `ShuffleBag`, nothing more.
 `ShuffleBag` implements all your favorite Bevy traits like `Component`, `Resource`, `Asset`, etc., so it's really flexible.
 For example, this is how you load sound assets and then play them in a random order, ensuring that no sound effect gets played twice:
 
@@ -82,6 +83,14 @@ fn play_sound(mut commands: Commands, mut sound_assets: ResMut<SoundAssets>) {
 ```
 
 See the `examples` directory for more :)
+
+
+## Compatibility
+
+| bevy        | bevy_shuffle_bag |
+|-------------|------------------|
+| 0.16.0-rc   | 0.2.0-rc              |
+| 0.15        | 0.1              |
 
 ## Credits
 
