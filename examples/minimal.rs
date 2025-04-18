@@ -11,7 +11,7 @@ fn main() {
 
 fn setup(mut commands: Commands) {
     // Spawn the shuffle bag.
-    let mut rng = rand::rng();
+    let mut rng = rand::thread_rng();
     commands.spawn(ShuffleBag::<usize>::try_new([1, 2, 3, 4, 5], &mut rng).unwrap());
 
     // Spawn some UI text
@@ -29,6 +29,6 @@ fn pick(
     mut text: Single<&mut TextSpan, With<PickText>>,
 ) {
     // Pick a number from the shuffle bag. This is guaranteed to never pick the same number twice in a row.
-    let pick = shuffle_bag.pick(&mut rand::rng());
+    let pick = shuffle_bag.pick(&mut rand::thread_rng());
     text.0 = format!("\tLast pick: {}", pick);
 }

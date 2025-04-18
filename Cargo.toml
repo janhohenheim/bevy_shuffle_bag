@@ -1,6 +1,6 @@
 [package]
 name = "bevy_shuffle_bag"
-version = "0.2.0-rc.1"
+version = "0.2.0-rc.2"
 edition = "2024"
 authors = ["Jan Hohenheim <jan@hohenheim.ch>"]
 exclude = ["./cargo_expand/", "./assets/"]
@@ -15,7 +15,7 @@ default = ["bevy_assets"]
 bevy_assets = ["bevy/bevy_asset"]
 
 [dependencies]
-rand = "0.9.1"
+rand = "0.8.5"
 serde = { version = "1", features = ["derive"], optional = true }
 tracing = { version = "0.1", features = [
     "max_level_debug",

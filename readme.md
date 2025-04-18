@@ -19,7 +19,7 @@ Using a shuffle bag is really simple. You just initialize it with some contents 
 use bevy::prelude::*;
 use bevy_shuffle_bag::ShuffleBag;
 
-let mut rng = rand::rng();
+let mut rng = rand::thread_rng();
 let mut treasure_chest = ShuffleBag::try_new(["gold", "armor", "sword"], &mut rng).unwrap();
 let loot = treasure_chest.pick(&mut rng);
 println!("I just picked up a {loot}!");
@@ -56,7 +56,7 @@ struct SoundAssets {
 impl FromWorld for SoundAssets {
     fn from_world(world: &mut World) -> Self {
         let assets = world.resource::<AssetServer>();
-        let mut rng = rand::rng();
+        let mut rng = rand::thread_rng();
         Self {
             steps: ShuffleBag::try_new(
                 vec![
@@ -73,7 +73,7 @@ impl FromWorld for SoundAssets {
 }
 
 fn play_sound(mut commands: Commands, mut sound_assets: ResMut<SoundAssets>) {
-    let mut rng = rand::rng();
+    let mut rng = rand::thread_rng();
     // Pick a sound from the shuffle bag. This is guaranteed to never pick the same sound twice in a row.
     let sound = sound_assets.steps.pick(&mut rng);
 
