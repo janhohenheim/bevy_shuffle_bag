@@ -28,3 +28,4 @@ default-features = false
 
 [dev-dependencies]
 paste = "1.0.15"
+bevy = { version = "0.15" }
