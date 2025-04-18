@@ -10,20 +10,53 @@ use std::{
     hash::{Hash, Hasher},
 };
 
+/// A bag full of items that can be picked in a random order.
+///
+/// The bag will be emptied in *drafts*, where each draft contains all the items in the bag, but in a random order.
+/// This means that if you have e.g. a bag with 3 soundtracks, all of them will play once in a random order, and then the bag will be refilled with the same soundtracks in a random order.
+/// If the bag contains no duplicates, items are always picked such that the same item is never picked twice in a row.
+///
+/// No more playing the same sound effect or dialogue twice in a row!
 #[derive(Component, Resource)]
 #[non_exhaustive]
 pub struct ShuffleBag<T> {
+    /// The full collection of items that could be in the bag at the same time.
     pub full_collection: Vec<T>,
+    /// The indices of the current draft of items that can be picked from the bag.
     pub current_draft: Vec<usize>,
+    /// The last item that was picked from the bag. If the bag was just created, this will be `None`.
     pub last_pick: Option<usize>,
 }
 
 impl<T> ShuffleBag<T> {
+    /// Create a new shuffle bag from an iterator. Returns `None` if the iterator is empty.
+    ///
+    /// # Example
+    /// ```
+    /// # use bevy::prelude::*;
+    /// # use std::collections::HashSet;
+    /// # use bevy_shuffle_bag::ShuffleBag;
+    /// let mut rng = rand::rng();
+    /// let mut possible_loot = HashSet::new();
+    /// possible_loot.insert("gold");
+    /// possible_loot.insert("armor");
+    /// possible_loot.insert("sword");
+    /// let treasure_chest = ShuffleBag::try_from_iter(possible_loot, &mut rng).unwrap();
+    /// ```
     pub fn try_from_iter(iter: impl IntoIterator<Item = T>, rng: &mut impl Rng) -> Option<Self> {
         let full_collection: Vec<_> = iter.into_iter().collect();
         Self::try_new(full_collection, rng)
     }
 
+    /// Create a new shuffle bag from something that can be converted into a vector. Returns `None` if the vector is empty.
+    ///
+    /// # Example
+    /// ```
+    /// # use bevy::prelude::*;
+    /// # use bevy_shuffle_bag::ShuffleBag;
+    /// let mut rng = rand::rng();
+    /// let treasure_chest = ShuffleBag::try_new(["gold", "armor", "sword"], &mut rng).unwrap();
+    /// ```
     pub fn try_new(full_collection: impl Into<Vec<T>>, rng: &mut impl Rng) -> Option<Self> {
         let full_collection = full_collection.into();
         if full_collection.is_empty() {
@@ -40,6 +73,25 @@ impl<T> ShuffleBag<T> {
         Some(bag)
     }
 
+    /// Shuffle a new draft of the bag. This is automatically called when the bag is empty or when the bag is first created.
+    ///
+    /// "Draft" here means the collection of items that can be picked from the bag.
+    /// After this call, the draft will contain all the items in the bag, but in a random order.
+    /// The draft is constructed such that the next item to be picked by [`ShuffleBag::pick`] is not the same as the last item that was picked.
+    ///
+    /// # Example
+    /// ```
+    /// # use bevy::prelude::*;
+    /// # use bevy_shuffle_bag::ShuffleBag;
+    /// let mut rng = rand::rng();
+    /// let mut treasure_chest = ShuffleBag::try_new(["gold", "armor", "sword"], &mut rng).unwrap();
+    /// let loot = treasure_chest.pick(&mut rng);
+    ///
+    /// // The player just used a joker to get a new item! Let's reshuffle the bag. Doing so will
+    /// // still ensure that the same item is never picked twice in a row.
+    /// treasure_chest.shuffle_new_draft(&mut rng);
+    /// let new_loot = treasure_chest.pick(&mut rng);
+    /// ```
     pub fn shuffle_new_draft(&mut self, rng: &mut impl Rng) {
         self.current_draft = (0..self.full_collection.len()).collect();
         self.current_draft.shuffle(rng);
@@ -64,6 +116,37 @@ impl<T> ShuffleBag<T> {
         self.current_draft.push(new_next_pick);
     }
 
+    /// Shuffle a new draft of the bag and forget the last item that was picked.
+    ///
+    /// # Example
+    /// ```
+    /// # use bevy::prelude::*;
+    /// # use bevy_shuffle_bag::ShuffleBag;
+    /// let mut rng = rand::rng();
+    /// let mut treasure_chest = ShuffleBag::try_new(["gold", "armor", "sword"], &mut rng).unwrap();
+    /// let loot = treasure_chest.pick(&mut rng);
+    ///
+    /// // The player just reloaded from a save, so let's reset the bag.
+    /// treasure_chest.reset(&mut rng);
+    /// let new_loot = treasure_chest.pick(&mut rng);
+    /// ```
+    pub fn reset(&mut self, rng: &mut impl Rng) {
+        self.current_draft = vec![];
+        self.last_pick = None;
+        self.shuffle_new_draft(rng);
+    }
+
+    /// Pick an item from the bag. If the bag is empty, this will automatically shuffle a new draft.
+    /// If there are no duplicates in the bag, this will never pick the same item twice in a row.
+    ///
+    /// # Example
+    /// ```
+    /// # use bevy::prelude::*;
+    /// # use bevy_shuffle_bag::ShuffleBag;
+    /// let mut rng = rand::rng();
+    /// let mut treasure_chest = ShuffleBag::try_new(["gold", "armor", "sword"], &mut rng).unwrap();
+    /// let loot = treasure_chest.pick(&mut rng);
+    /// ```
     pub fn pick(&mut self, rng: &mut impl Rng) -> &T {
         let pick = self.current_draft.pop().unwrap();
         self.last_pick = Some(pick);
@@ -75,6 +158,23 @@ impl<T> ShuffleBag<T> {
         &self.full_collection[pick]
     }
 
+    /// Peek at the next item that would be picked from the bag.
+    ///
+    /// # Example
+    /// ```
+    /// # use bevy::prelude::*;
+    /// # use bevy_shuffle_bag::ShuffleBag;
+    /// let mut rng = rand::rng();
+    /// let mut shop = ShuffleBag::try_new(["potion", "shield", "bow"], &mut rng).unwrap();
+    ///
+    /// // The player is browsing the shop. The shopkeeper randomly picks an item that is available for purchase.
+    /// let available_purchase = shop.peek().clone();
+    ///
+    /// // The player likes what they see, so they buy it!
+    /// let purchased_item = shop.pick(&mut rng).clone();
+    ///
+    /// assert_eq!(purchased_item, available_purchase);
+    /// ```
     pub fn peek(&self) -> &T {
         &self.full_collection[*self.current_draft.last().unwrap()]
     }
