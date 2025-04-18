@@ -3,7 +3,7 @@
 [![crates.io](https://img.shields.io/crates/v/bevy_shuffle_bag)](https://crates.io/crates/bevy_shuffle_bag)
 [![docs.rs](https://docs.rs/bevy_shuffle_bag/badge.svg)](https://docs.rs/bevy_shuffle_bag)
 
-A tiny crate providing a shuffle bag, which is a collection of items that can be picked in a random, nonrepeating order.
+A tiny crate providing a shuffle bag, which is a collection of items that can endlessly be picked in a random, nonrepeating order.
 
 The bag will be emptied in *drafts*, where each draft contains all the items in the bag, but in a random order.
 This means that if you have e.g. a bag with 3 soundtracks, all of them will play once in a random order, and then the bag will be refilled with the same soundtracks in a random order.

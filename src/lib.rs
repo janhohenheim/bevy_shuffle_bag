@@ -10,7 +10,7 @@ use std::{
     hash::{Hash, Hasher},
 };
 
-/// A bag full of items that can be picked in a random order.
+/// A bag full of items that can endlessly be picked in a random order.
 ///
 /// The bag will be emptied in *drafts*, where each draft contains all the items in the bag, but in a random order.
 /// This means that if you have e.g. a bag with 3 soundtracks, all of them will play once in a random order, and then the bag will be refilled with the same soundtracks in a random order.
