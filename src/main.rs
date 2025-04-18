@@ -221,7 +221,20 @@ mod tests {
     use super::*;
     use paste::paste;
 
-    macro_rules! accept_type {
+    assert_implements_type!(
+        Eq,
+        Hash,
+        Clone,
+        Debug,
+        PartialEq,
+        PartialReflect,
+        Reflect,
+        Struct,
+        TypePath,
+        Typed
+    );
+
+    macro_rules! assert_implements_type {
         ($($name:ident),*) => {
             $(
                 paste! {
@@ -237,17 +250,5 @@ mod tests {
             )*
         };
     }
-
-    accept_type!(
-        Eq,
-        Hash,
-        Clone,
-        Debug,
-        PartialEq,
-        PartialReflect,
-        Reflect,
-        Struct,
-        TypePath,
-        Typed
-    );
+    use assert_implements_type;
 }
