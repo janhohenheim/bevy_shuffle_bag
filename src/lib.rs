@@ -5,15 +5,15 @@ use std::{
     hash::{Hash, Hasher},
 };
 
-#[derive(Component, Resource, Clone, PartialEq, Eq)]
+#[derive(Component, Resource, Clone)]
 #[non_exhaustive]
-pub struct ShuffleBag<T: Clone + Eq + PartialEq> {
+pub struct ShuffleBag<T: Clone> {
     pub full_collection: Vec<T>,
-    pub current_draft: Vec<T>,
-    pub last_pick: Option<T>,
+    pub current_draft: Vec<usize>,
+    pub last_pick: Option<usize>,
 }
 
-impl<T: Clone + Eq + PartialEq> ShuffleBag<T> {
+impl<T: Clone> ShuffleBag<T> {
     pub fn try_new(full_collection: impl Into<Vec<T>>, rng: &mut impl Rng) -> Option<Self> {
         let full_collection = full_collection.into();
         if full_collection.is_empty() {
@@ -31,7 +31,7 @@ impl<T: Clone + Eq + PartialEq> ShuffleBag<T> {
     }
 
     pub fn shuffle_new_draft(&mut self, rng: &mut impl Rng) {
-        self.current_draft = self.full_collection.clone();
+        self.current_draft = (0..self.full_collection.len()).collect();
         self.current_draft.shuffle(rng);
         if self.current_draft.len() <= 1 {
             return;
@@ -58,12 +58,12 @@ impl<T: Clone + Eq + PartialEq> ShuffleBag<T> {
             self.shuffle_new_draft(rng);
         }
 
-        self.last_pick = Some(pick.clone());
-        pick
+        self.last_pick = Some(pick);
+        self.full_collection[pick].clone()
     }
 }
 
-impl<T: Clone + Debug + Eq + PartialEq> Debug for ShuffleBag<T> {
+impl<T: Clone + Debug> Debug for ShuffleBag<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("ShuffleBag")
             .field("full_collection", &self.full_collection)
@@ -73,7 +73,17 @@ impl<T: Clone + Debug + Eq + PartialEq> Debug for ShuffleBag<T> {
     }
 }
 
-impl<T: Hash + Clone + Eq + PartialEq> Hash for ShuffleBag<T> {
+impl<T: Clone + PartialEq> PartialEq for ShuffleBag<T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.full_collection == other.full_collection
+            && self.current_draft == other.current_draft
+            && self.last_pick == other.last_pick
+    }
+}
+
+impl<T: Clone + Eq> Eq for ShuffleBag<T> {}
+
+impl<T: Hash + Clone> Hash for ShuffleBag<T> {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.full_collection.hash(state);
         self.current_draft.hash(state);
@@ -81,7 +91,7 @@ impl<T: Hash + Clone + Eq + PartialEq> Hash for ShuffleBag<T> {
     }
 }
 
-impl<T: Clone + VisitAssetDependencies + Eq + PartialEq> VisitAssetDependencies for ShuffleBag<T> {
+impl<T: Clone + VisitAssetDependencies> VisitAssetDependencies for ShuffleBag<T> {
     fn visit_dependencies(&self, visit: &mut impl FnMut(bevy::asset::UntypedAssetId)) {
         for item in &self.full_collection {
             item.visit_dependencies(visit);
@@ -96,14 +106,6 @@ const _: () = {
     where
         ShuffleBag<T>: ::core::any::Any + ::core::marker::Send + ::core::marker::Sync,
         Vec<T>: bevy::reflect::FromReflect
-            + bevy::reflect::TypePath
-            + bevy::reflect::MaybeTyped
-            + bevy::reflect::__macro_exports::RegisterForReflection,
-        Vec<T>: bevy::reflect::FromReflect
-            + bevy::reflect::TypePath
-            + bevy::reflect::MaybeTyped
-            + bevy::reflect::__macro_exports::RegisterForReflection,
-        Option<T>: bevy::reflect::FromReflect
             + bevy::reflect::TypePath
             + bevy::reflect::MaybeTyped
             + bevy::reflect::__macro_exports::RegisterForReflection,
@@ -123,24 +125,18 @@ const _: () = {
         #[inline(never)]
         fn register_type_dependencies(registry: &mut bevy::reflect::TypeRegistry) {
             <Vec<T> as bevy::reflect::__macro_exports::RegisterForReflection>::__register(registry);
-            <Vec<T> as bevy::reflect::__macro_exports::RegisterForReflection>::__register(registry);
-            <Option<T> as bevy::reflect::__macro_exports::RegisterForReflection>::__register(
+            <Vec<usize> as bevy::reflect::__macro_exports::RegisterForReflection>::__register(
+                registry,
+            );
+            <Option<usize> as bevy::reflect::__macro_exports::RegisterForReflection>::__register(
                 registry,
             );
         }
     }
-    impl<T: Clone + Eq + PartialEq> bevy::reflect::Typed for ShuffleBag<T>
+    impl<T: Clone> bevy::reflect::Typed for ShuffleBag<T>
     where
         ShuffleBag<T>: ::core::any::Any + ::core::marker::Send + ::core::marker::Sync,
         Vec<T>: bevy::reflect::FromReflect
-            + bevy::reflect::TypePath
-            + bevy::reflect::MaybeTyped
-            + bevy::reflect::__macro_exports::RegisterForReflection,
-        Vec<T>: bevy::reflect::FromReflect
-            + bevy::reflect::TypePath
-            + bevy::reflect::MaybeTyped
-            + bevy::reflect::__macro_exports::RegisterForReflection,
-        Option<T>: bevy::reflect::FromReflect
             + bevy::reflect::TypePath
             + bevy::reflect::MaybeTyped
             + bevy::reflect::__macro_exports::RegisterForReflection,
@@ -156,11 +152,11 @@ const _: () = {
                             .with_custom_attributes(
                                 bevy::reflect::attributes::CustomAttributes::default(),
                             ),
-                        bevy::reflect::NamedField::new::<Vec<T>>("current_draft")
+                        bevy::reflect::NamedField::new::<Vec<usize>>("current_draft")
                             .with_custom_attributes(
                                 bevy::reflect::attributes::CustomAttributes::default(),
                             ),
-                        bevy::reflect::NamedField::new::<Option<T>>("last_pick")
+                        bevy::reflect::NamedField::new::<Option<usize>>("last_pick")
                             .with_custom_attributes(
                                 bevy::reflect::attributes::CustomAttributes::default(),
                             ),
@@ -170,7 +166,7 @@ const _: () = {
             })
         }
     }
-    impl<T: Clone + Eq + PartialEq> bevy::reflect::TypePath for ShuffleBag<T>
+    impl<T: Clone> bevy::reflect::TypePath for ShuffleBag<T>
     where
         ShuffleBag<T>: ::core::any::Any + ::core::marker::Send + ::core::marker::Sync,
     {
@@ -190,18 +186,10 @@ const _: () = {
             ::core::option::Option::Some("bevy_shuffle_bag")
         }
     }
-    impl<T: Clone + Eq + PartialEq> bevy::reflect::Reflect for ShuffleBag<T>
+    impl<T: Clone> bevy::reflect::Reflect for ShuffleBag<T>
     where
         ShuffleBag<T>: ::core::any::Any + ::core::marker::Send + ::core::marker::Sync,
         Vec<T>: bevy::reflect::FromReflect
-            + bevy::reflect::TypePath
-            + bevy::reflect::MaybeTyped
-            + bevy::reflect::__macro_exports::RegisterForReflection,
-        Vec<T>: bevy::reflect::FromReflect
-            + bevy::reflect::TypePath
-            + bevy::reflect::MaybeTyped
-            + bevy::reflect::__macro_exports::RegisterForReflection,
-        Option<T>: bevy::reflect::FromReflect
             + bevy::reflect::TypePath
             + bevy::reflect::MaybeTyped
             + bevy::reflect::__macro_exports::RegisterForReflection,
@@ -241,18 +229,10 @@ const _: () = {
             ::core::result::Result::Ok(())
         }
     }
-    impl<T: Clone + Eq + PartialEq> bevy::reflect::Struct for ShuffleBag<T>
+    impl<T: Clone> bevy::reflect::Struct for ShuffleBag<T>
     where
         ShuffleBag<T>: ::core::any::Any + ::core::marker::Send + ::core::marker::Sync,
         Vec<T>: bevy::reflect::FromReflect
-            + bevy::reflect::TypePath
-            + bevy::reflect::MaybeTyped
-            + bevy::reflect::__macro_exports::RegisterForReflection,
-        Vec<T>: bevy::reflect::FromReflect
-            + bevy::reflect::TypePath
-            + bevy::reflect::MaybeTyped
-            + bevy::reflect::__macro_exports::RegisterForReflection,
-        Option<T>: bevy::reflect::FromReflect
             + bevy::reflect::TypePath
             + bevy::reflect::MaybeTyped
             + bevy::reflect::__macro_exports::RegisterForReflection,
@@ -332,18 +312,10 @@ const _: () = {
             dynamic
         }
     }
-    impl<T: Clone + Eq + PartialEq> bevy::reflect::PartialReflect for ShuffleBag<T>
+    impl<T: Clone> bevy::reflect::PartialReflect for ShuffleBag<T>
     where
         ShuffleBag<T>: ::core::any::Any + ::core::marker::Send + ::core::marker::Sync,
         Vec<T>: bevy::reflect::FromReflect
-            + bevy::reflect::TypePath
-            + bevy::reflect::MaybeTyped
-            + bevy::reflect::__macro_exports::RegisterForReflection,
-        Vec<T>: bevy::reflect::FromReflect
-            + bevy::reflect::TypePath
-            + bevy::reflect::MaybeTyped
-            + bevy::reflect::__macro_exports::RegisterForReflection,
-        Option<T>: bevy::reflect::FromReflect
             + bevy::reflect::TypePath
             + bevy::reflect::MaybeTyped
             + bevy::reflect::__macro_exports::RegisterForReflection,
@@ -440,18 +412,10 @@ const _: () = {
             (bevy::reflect::struct_partial_eq)(self, value)
         }
     }
-    impl<T: Clone + Eq + PartialEq> bevy::reflect::FromReflect for ShuffleBag<T>
+    impl<T: Clone> bevy::reflect::FromReflect for ShuffleBag<T>
     where
         ShuffleBag<T>: ::core::any::Any + ::core::marker::Send + ::core::marker::Sync,
         Vec<T>: bevy::reflect::FromReflect
-            + bevy::reflect::TypePath
-            + bevy::reflect::MaybeTyped
-            + bevy::reflect::__macro_exports::RegisterForReflection,
-        Vec<T>: bevy::reflect::FromReflect
-            + bevy::reflect::TypePath
-            + bevy::reflect::MaybeTyped
-            + bevy::reflect::__macro_exports::RegisterForReflection,
-        Option<T>: bevy::reflect::FromReflect
             + bevy::reflect::TypePath
             + bevy::reflect::MaybeTyped
             + bevy::reflect::__macro_exports::RegisterForReflection,
@@ -469,12 +433,12 @@ const _: () = {
                         )
                     })()?,
                     current_draft: (|| {
-                        <Vec<T> as bevy::reflect::FromReflect>::from_reflect(
+                        <Vec<usize> as bevy::reflect::FromReflect>::from_reflect(
                             bevy::reflect::Struct::field(__ref_struct, "current_draft")?,
                         )
                     })()?,
                     last_pick: (|| {
-                        <Option<T> as bevy::reflect::FromReflect>::from_reflect(
+                        <Option<usize> as bevy::reflect::FromReflect>::from_reflect(
                             bevy::reflect::Struct::field(__ref_struct, "last_pick")?,
                         )
                     })()?,
