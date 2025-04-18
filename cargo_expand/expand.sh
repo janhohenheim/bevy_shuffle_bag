@@ -1,5 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-cargo expand > expanded.rs
-cp expanded.rs ../expanded.rs
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+cd $SCRIPT_DIR
+cargo expand > ../expanded.rs

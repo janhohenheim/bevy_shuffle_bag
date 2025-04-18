@@ -1006,9 +1006,9 @@ name = "bevy_shuffle_bag"
 version = "0.1.0"
 dependencies = [
  "bevy",
- "log",
  "paste",
  "rand 0.9.1",
+ "serde",
  "tracing",
 ]
 
