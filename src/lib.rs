@@ -1,4 +1,9 @@
-use bevy::{asset::VisitAssetDependencies, prelude::*};
+#![warn(missing_docs)]
+#![doc = include_str!("../readme.md")]
+
+#[cfg(feature = "bevy_assets")]
+use bevy::asset::VisitAssetDependencies;
+use bevy::prelude::*;
 use rand::{Rng, seq::SliceRandom as _};
 use std::{
     fmt::{Debug, Formatter},
@@ -543,7 +548,7 @@ mod tests {
     #[derive(Asset, TypePath)]
     struct _TestAsset {
         #[dependency]
-        shuffle_bag: ShuffleBag<Handle<Image>>,
+        shuffle_bag: ShuffleBag<Handle<()>>,
     }
 
     macro_rules! assert_implements_type {
