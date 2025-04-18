@@ -14,6 +14,11 @@ pub struct ShuffleBag<T> {
 }
 
 impl<T> ShuffleBag<T> {
+    pub fn try_from_iter(iter: impl IntoIterator<Item = T>, rng: &mut impl Rng) -> Option<Self> {
+        let full_collection: Vec<_> = iter.into_iter().collect();
+        Self::try_new(full_collection, rng)
+    }
+
     pub fn try_new(full_collection: impl Into<Vec<T>>, rng: &mut impl Rng) -> Option<Self> {
         let full_collection = full_collection.into();
         if full_collection.is_empty() {
@@ -60,6 +65,10 @@ impl<T> ShuffleBag<T> {
 
         self.last_pick = Some(pick);
         &self.full_collection[pick]
+    }
+
+    pub fn peek(&self) -> &T {
+        &self.full_collection[*self.current_draft.last().unwrap()]
     }
 }
 
