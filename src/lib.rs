@@ -5,15 +5,15 @@ use std::{
     hash::{Hash, Hasher},
 };
 
-#[derive(Component, Resource, Clone)]
+#[derive(Component, Resource)]
 #[non_exhaustive]
-pub struct ShuffleBag<T: Clone> {
+pub struct ShuffleBag<T> {
     pub full_collection: Vec<T>,
     pub current_draft: Vec<usize>,
     pub last_pick: Option<usize>,
 }
 
-impl<T: Clone> ShuffleBag<T> {
+impl<T> ShuffleBag<T> {
     pub fn try_new(full_collection: impl Into<Vec<T>>, rng: &mut impl Rng) -> Option<Self> {
         let full_collection = full_collection.into();
         if full_collection.is_empty() {
@@ -52,18 +52,18 @@ impl<T: Clone> ShuffleBag<T> {
         self.current_draft.push(new_next_pick);
     }
 
-    pub fn pick(&mut self, rng: &mut impl Rng) -> T {
+    pub fn pick(&mut self, rng: &mut impl Rng) -> &T {
         let pick = self.current_draft.pop().unwrap();
         if self.current_draft.is_empty() {
             self.shuffle_new_draft(rng);
         }
 
         self.last_pick = Some(pick);
-        self.full_collection[pick].clone()
+        &self.full_collection[pick]
     }
 }
 
-impl<T: Clone + Debug> Debug for ShuffleBag<T> {
+impl<T: Debug> Debug for ShuffleBag<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("ShuffleBag")
             .field("full_collection", &self.full_collection)
@@ -73,7 +73,17 @@ impl<T: Clone + Debug> Debug for ShuffleBag<T> {
     }
 }
 
-impl<T: Clone + PartialEq> PartialEq for ShuffleBag<T> {
+impl<T: Clone> Clone for ShuffleBag<T> {
+    fn clone(&self) -> Self {
+        Self {
+            full_collection: self.full_collection.clone(),
+            current_draft: self.current_draft.clone(),
+            last_pick: self.last_pick,
+        }
+    }
+}
+
+impl<T: PartialEq> PartialEq for ShuffleBag<T> {
     fn eq(&self, other: &Self) -> bool {
         self.full_collection == other.full_collection
             && self.current_draft == other.current_draft
@@ -81,7 +91,7 @@ impl<T: Clone + PartialEq> PartialEq for ShuffleBag<T> {
     }
 }
 
-impl<T: Clone + Eq> Eq for ShuffleBag<T> {}
+impl<T: Eq> Eq for ShuffleBag<T> {}
 
 impl<T: Hash + Clone> Hash for ShuffleBag<T> {
     fn hash<H: Hasher>(&self, state: &mut H) {
@@ -91,7 +101,7 @@ impl<T: Hash + Clone> Hash for ShuffleBag<T> {
     }
 }
 
-impl<T: Clone + VisitAssetDependencies> VisitAssetDependencies for ShuffleBag<T> {
+impl<T: VisitAssetDependencies> VisitAssetDependencies for ShuffleBag<T> {
     fn visit_dependencies(&self, visit: &mut impl FnMut(bevy::asset::UntypedAssetId)) {
         for item in &self.full_collection {
             item.visit_dependencies(visit);
@@ -102,7 +112,7 @@ impl<T: Clone + VisitAssetDependencies> VisitAssetDependencies for ShuffleBag<T>
 // The following is adapted from the output of `cargo expand`. Run `cargo_expand/expand.sh` to generate the template.
 const _: () = {
     #[allow(unused_mut)]
-    impl<T: Clone + PartialEq + Eq> bevy::reflect::GetTypeRegistration for ShuffleBag<T>
+    impl<T: PartialEq + Eq> bevy::reflect::GetTypeRegistration for ShuffleBag<T>
     where
         ShuffleBag<T>: ::core::any::Any + ::core::marker::Send + ::core::marker::Sync,
         Vec<T>: bevy::reflect::FromReflect
@@ -133,7 +143,7 @@ const _: () = {
             );
         }
     }
-    impl<T: Clone> bevy::reflect::Typed for ShuffleBag<T>
+    impl<T> bevy::reflect::Typed for ShuffleBag<T>
     where
         ShuffleBag<T>: ::core::any::Any + ::core::marker::Send + ::core::marker::Sync,
         Vec<T>: bevy::reflect::FromReflect
@@ -166,7 +176,7 @@ const _: () = {
             })
         }
     }
-    impl<T: Clone> bevy::reflect::TypePath for ShuffleBag<T>
+    impl<T> bevy::reflect::TypePath for ShuffleBag<T>
     where
         ShuffleBag<T>: ::core::any::Any + ::core::marker::Send + ::core::marker::Sync,
     {
@@ -186,7 +196,7 @@ const _: () = {
             ::core::option::Option::Some("bevy_shuffle_bag")
         }
     }
-    impl<T: Clone> bevy::reflect::Reflect for ShuffleBag<T>
+    impl<T> bevy::reflect::Reflect for ShuffleBag<T>
     where
         ShuffleBag<T>: ::core::any::Any + ::core::marker::Send + ::core::marker::Sync,
         Vec<T>: bevy::reflect::FromReflect
@@ -229,7 +239,7 @@ const _: () = {
             ::core::result::Result::Ok(())
         }
     }
-    impl<T: Clone> bevy::reflect::Struct for ShuffleBag<T>
+    impl<T> bevy::reflect::Struct for ShuffleBag<T>
     where
         ShuffleBag<T>: ::core::any::Any + ::core::marker::Send + ::core::marker::Sync,
         Vec<T>: bevy::reflect::FromReflect
@@ -312,7 +322,7 @@ const _: () = {
             dynamic
         }
     }
-    impl<T: Clone> bevy::reflect::PartialReflect for ShuffleBag<T>
+    impl<T> bevy::reflect::PartialReflect for ShuffleBag<T>
     where
         ShuffleBag<T>: ::core::any::Any + ::core::marker::Send + ::core::marker::Sync,
         Vec<T>: bevy::reflect::FromReflect
@@ -412,7 +422,7 @@ const _: () = {
             (bevy::reflect::struct_partial_eq)(self, value)
         }
     }
-    impl<T: Clone> bevy::reflect::FromReflect for ShuffleBag<T>
+    impl<T> bevy::reflect::FromReflect for ShuffleBag<T>
     where
         ShuffleBag<T>: ::core::any::Any + ::core::marker::Send + ::core::marker::Sync,
         Vec<T>: bevy::reflect::FromReflect
@@ -469,7 +479,7 @@ mod tests {
         let mut rng = rand::rng();
         let mut bag = ShuffleBag::<usize>::try_new(vec![1], &mut rng).unwrap();
         for _ in 0..100 {
-            assert_eq!(bag.pick(&mut rng), 1);
+            assert_eq!(*bag.pick(&mut rng), 1);
         }
     }
 
@@ -480,12 +490,12 @@ mod tests {
         let mut picked = Vec::new();
         for _ in 0..99 {
             let item = bag.pick(&mut rng);
-            picked.push(item);
+            picked.push(*item);
         }
         assert_eq!(picked.len(), 99, "expected 99 items, got {}", picked.len());
-        let ones = picked.iter().filter(|&item| *item == 1).count();
-        let twos = picked.iter().filter(|&item| *item == 2).count();
-        let threes = picked.iter().filter(|&item| *item == 3).count();
+        let ones = picked.iter().filter(|&&item| item == 1).count();
+        let twos = picked.iter().filter(|&&item| item == 2).count();
+        let threes = picked.iter().filter(|&&item| item == 3).count();
         assert!(ones == 33, "ones: {} (expected 33)", ones);
         assert!(twos == 33, "twos: {} (expected 33)", twos);
         assert!(threes == 33, "threes: {} (expected 33)", threes);
@@ -497,7 +507,7 @@ mod tests {
         let mut bag = ShuffleBag::<usize>::try_new(vec![1, 2, 3], &mut rng).unwrap();
         let mut last_pick = None;
         for _ in 0..1000 {
-            let pick = bag.pick(&mut rng);
+            let pick = *bag.pick(&mut rng);
             assert_ne!(Some(pick), last_pick);
             last_pick = Some(pick);
         }
