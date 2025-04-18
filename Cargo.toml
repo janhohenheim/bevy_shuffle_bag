@@ -1,6 +1,6 @@
 [package]
 name = "bevy_shuffle_bag"
-version = "0.1.0"
+version = "0.2.0-rc.1"
 edition = "2024"
 authors = ["Jan Hohenheim <jan@hohenheim.ch>"]
 exclude = ["./cargo_expand/", "./assets/"]
@@ -23,9 +23,9 @@ tracing = { version = "0.1", features = [
 ] }
 
 [dependencies.bevy]
-version = "0.15"
+version = "0.16.0-rc"
 default-features = false
 
 [dev-dependencies]
 paste = "1.0.15"
-bevy = { version = "0.15" }
+bevy = { version = "0.16.0-rc" }

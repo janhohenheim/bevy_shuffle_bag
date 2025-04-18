@@ -426,15 +426,15 @@ const _: () = {
             ));
             dynamic.insert_boxed(
                 "full_collection",
-                bevy::reflect::PartialReflect::clone_value(&self.full_collection),
+                bevy::reflect::PartialReflect::to_dynamic(&self.full_collection),
             );
             dynamic.insert_boxed(
                 "current_draft",
-                bevy::reflect::PartialReflect::clone_value(&self.current_draft),
+                bevy::reflect::PartialReflect::to_dynamic(&self.current_draft),
             );
             dynamic.insert_boxed(
                 "last_pick",
-                bevy::reflect::PartialReflect::clone_value(&self.last_pick),
+                bevy::reflect::PartialReflect::to_dynamic(&self.last_pick),
             );
             dynamic
         }
@@ -455,7 +455,7 @@ const _: () = {
         }
         #[inline]
         fn clone_value(&self) -> ::std::boxed::Box<dyn bevy::reflect::PartialReflect> {
-            ::std::boxed::Box::new(bevy::reflect::Struct::clone_dynamic(self))
+            ::std::boxed::Box::new(bevy::reflect::Struct::to_dynamic_struct(self))
         }
         #[inline]
         fn try_apply(
