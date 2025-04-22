@@ -13,6 +13,7 @@ categories = ["game-development"]
 [features]
 default = ["bevy_assets"]
 bevy_assets = ["bevy/bevy_asset"]
+serialize = ["dep:serde"]
 
 [dependencies]
 rand = "0.8.5"
