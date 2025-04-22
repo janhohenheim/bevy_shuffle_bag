@@ -223,6 +223,8 @@ mod tests {
     use super::*;
     use bevy::reflect::Typed;
     use paste::paste;
+    #[cfg(feature = "serialize")]
+    use serde::{Deserialize, Serialize};
 
     #[test]
     fn fails_to_create_empty_shuffle_bag() {
@@ -285,6 +287,18 @@ mod tests {
         Resource
     );
 
+    #[cfg(feature = "serialize")]
+    assert_implements_type!(Serialize);
+
+    #[cfg(feature = "serialize")]
+    #[test]
+    fn is_deserialize() {
+        fn accept_type<T: for<'a> Deserialize<'a>>(_: T) {}
+        let mut rng = rand::thread_rng();
+        let bag = ShuffleBag::try_new(vec![1, 2, 3], &mut rng).unwrap();
+        accept_type(bag);
+    }
+
     #[derive(Asset, TypePath)]
     struct _TestAsset {
         #[dependency]
@@ -292,13 +306,13 @@ mod tests {
     }
 
     macro_rules! assert_implements_type {
-        ($($name:ident),*) => {
+        ($($name:ty),*) => {
             $(
                 paste! {
                     #[test]
                     #[allow(non_snake_case)]
                     fn [<is_ $name>]() {
-                    fn accept_type<T: $name>(_a: T) {}
+                    fn accept_type<T: $name>(_: T) {}
                         let mut rng = rand::thread_rng();
                         let bag = ShuffleBag::try_new(vec![1, 2, 3], &mut rng).unwrap();
                         accept_type(bag);
