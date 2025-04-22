@@ -229,7 +229,7 @@ impl<T: VisitAssetDependencies> VisitAssetDependencies for ShuffleBag<T> {
 // The following is adapted from the output of `cargo expand`. Run `cargo_expand/expand.sh` to generate the template.
 const _: () = {
     #[allow(unused_mut)]
-    impl<T: PartialEq + Eq> bevy::reflect::GetTypeRegistration for ShuffleBag<T>
+    impl<T> bevy::reflect::GetTypeRegistration for ShuffleBag<T>
     where
         ShuffleBag<T>: ::core::any::Any + ::core::marker::Send + ::core::marker::Sync,
         Vec<T>: bevy::reflect::FromReflect
