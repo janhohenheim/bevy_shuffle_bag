@@ -6,7 +6,7 @@ use bevy::asset::VisitAssetDependencies;
 use bevy::prelude::*;
 use rand::{Rng, seq::SliceRandom as _};
 use std::{
-    fmt::{Debug, Formatter},
+    fmt::Debug,
     hash::{Hash, Hasher},
 };
 
@@ -17,7 +17,7 @@ use std::{
 /// If the bag contains no duplicates, items are always picked such that the same item is never picked twice in a row.
 ///
 /// No more playing the same sound effect or dialogue twice in a row!
-#[derive(Component, Resource)]
+#[derive(Component, Resource, Debug)]
 #[non_exhaustive]
 pub struct ShuffleBag<T> {
     /// The full collection of items that could be in the bag at the same time.
@@ -177,16 +177,6 @@ impl<T> ShuffleBag<T> {
     /// ```
     pub fn peek(&self) -> &T {
         &self.full_collection[*self.current_draft.last().unwrap()]
-    }
-}
-
-impl<T: Debug> Debug for ShuffleBag<T> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("ShuffleBag")
-            .field("full_collection", &self.full_collection)
-            .field("current_draft", &self.current_draft)
-            .field("last_pick", &self.last_pick)
-            .finish()
     }
 }
 
