@@ -18,6 +18,7 @@ use std::{
 ///
 /// No more playing the same sound effect or dialogue twice in a row!
 #[derive(Component, Resource, Debug, Reflect)]
+#[reflect(Component, Resource)]
 #[non_exhaustive]
 pub struct ShuffleBag<T> {
     /// The full collection of items that could be in the bag at the same time.
