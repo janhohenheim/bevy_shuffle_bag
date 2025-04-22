@@ -18,6 +18,7 @@ use std::{
 ///
 /// No more playing the same sound effect or dialogue twice in a row!
 #[derive(Component, Resource, Debug, Reflect)]
+#[cfg_attr(feature = "serialize", derive(serde::Serialize, serde::Deserialize))]
 #[reflect(Component, Resource)]
 #[non_exhaustive]
 pub struct ShuffleBag<T> {

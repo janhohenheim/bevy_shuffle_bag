@@ -29,7 +29,7 @@ jobs:
       - name: Install alsa and udev
         run: sudo apt-get update; sudo apt-get install --no-install-recommends libasound2-dev libudev-dev
       - name: Run cargo clippy
-        run: cargo clippy --tests --examples
+        run: cargo clippy --tests --examples --all-features
 
   format:
     runs-on: ubuntu-latest
@@ -85,4 +85,4 @@ jobs:
       - name: Run doc tests
         run: |
           # Setting LD_LIBRARY_PATH is a workaround for https://github.com/TheBevyFlock/bevy_new_2d/pull/318#issuecomment-2585935350
-          LD_LIBRARY_PATH="$(rustc --print target-libdir)" cargo test --doc
+          LD_LIBRARY_PATH="$(rustc --print target-libdir)" cargo test --doc --all-features
