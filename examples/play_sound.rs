@@ -25,17 +25,13 @@ struct SoundAssets {
 impl FromWorld for SoundAssets {
     fn from_world(world: &mut World) -> Self {
         let assets = world.resource::<AssetServer>();
-        let mut rng = rand::thread_rng();
         Self {
-            steps: ShuffleBag::try_new(
-                vec![
-                    assets.load("step1.ogg"),
-                    assets.load("step2.ogg"),
-                    assets.load("step3.ogg"),
-                    assets.load("step4.ogg"),
-                ],
-                &mut rng,
-            )
+            steps: ShuffleBag::try_new(vec![
+                assets.load("step1.ogg"),
+                assets.load("step2.ogg"),
+                assets.load("step3.ogg"),
+                assets.load("step4.ogg"),
+            ])
             .unwrap(),
         }
     }
@@ -48,9 +44,8 @@ fn setup(mut commands: Commands) {
 }
 
 fn play_sound(mut commands: Commands, mut sound_assets: ResMut<SoundAssets>) {
-    let mut rng = rand::thread_rng();
     // Pick a sound from the shuffle bag. This is guaranteed to never pick the same sound twice in a row.
-    let sound = sound_assets.steps.pick(&mut rng);
+    let sound = sound_assets.steps.pick();
 
     // Spawn an audio player that plays the sound and despawns when it finishes.
     commands.spawn((AudioPlayer::new(sound.clone()), PlaybackSettings::DESPAWN));

@@ -38,16 +38,15 @@ impl<T> ShuffleBag<T> {
     /// # use bevy::prelude::*;
     /// # use std::collections::HashSet;
     /// # use bevy_shuffle_bag::ShuffleBag;
-    /// let mut rng = rand::thread_rng();
     /// let mut possible_loot = HashSet::new();
     /// possible_loot.insert("gold");
     /// possible_loot.insert("armor");
     /// possible_loot.insert("sword");
-    /// let treasure_chest = ShuffleBag::try_from_iter(possible_loot, &mut rng).unwrap();
+    /// let treasure_chest = ShuffleBag::try_from_iter(possible_loot).unwrap();
     /// ```
-    pub fn try_from_iter(iter: impl IntoIterator<Item = T>, rng: &mut impl Rng) -> Option<Self> {
+    pub fn try_from_iter(iter: impl IntoIterator<Item = T>) -> Option<Self> {
         let full_collection: Vec<_> = iter.into_iter().collect();
-        Self::try_new(full_collection, rng)
+        Self::try_new(full_collection)
     }
 
     /// Create a new shuffle bag from something that can be converted into a vector. Returns `None` if the vector is empty.
@@ -56,10 +55,9 @@ impl<T> ShuffleBag<T> {
     /// ```
     /// # use bevy::prelude::*;
     /// # use bevy_shuffle_bag::ShuffleBag;
-    /// let mut rng = rand::thread_rng();
-    /// let treasure_chest = ShuffleBag::try_new(["gold", "armor", "sword"], &mut rng).unwrap();
+    /// let treasure_chest = ShuffleBag::try_new(["gold", "armor", "sword"]).unwrap();
     /// ```
-    pub fn try_new(full_collection: impl Into<Vec<T>>, rng: &mut impl Rng) -> Option<Self> {
+    pub fn try_new(full_collection: impl Into<Vec<T>>) -> Option<Self> {
         let full_collection = full_collection.into();
         if full_collection.is_empty() {
             return None;
@@ -71,7 +69,7 @@ impl<T> ShuffleBag<T> {
             last_pick: None,
         };
 
-        bag.shuffle_new_draft(rng);
+        bag.shuffle_new_draft();
         Some(bag)
     }
 
@@ -85,18 +83,18 @@ impl<T> ShuffleBag<T> {
     /// ```
     /// # use bevy::prelude::*;
     /// # use bevy_shuffle_bag::ShuffleBag;
-    /// let mut rng = rand::thread_rng();
-    /// let mut treasure_chest = ShuffleBag::try_new(["gold", "armor", "sword"], &mut rng).unwrap();
-    /// let loot = treasure_chest.pick(&mut rng);
+    /// let mut treasure_chest = ShuffleBag::try_new(["gold", "armor", "sword"]).unwrap();
+    /// let loot = treasure_chest.pick();
     ///
     /// // The player just used a joker to get a new item! Let's reshuffle the bag. Doing so will
     /// // still ensure that the same item is never picked twice in a row.
-    /// treasure_chest.shuffle_new_draft(&mut rng);
-    /// let new_loot = treasure_chest.pick(&mut rng);
+    /// treasure_chest.shuffle_new_draft();
+    /// let new_loot = treasure_chest.pick();
     /// ```
-    pub fn shuffle_new_draft(&mut self, rng: &mut impl Rng) {
+    pub fn shuffle_new_draft(&mut self) {
+        let mut rng = rand::thread_rng();
         self.current_draft = (0..self.full_collection.len()).collect();
-        self.current_draft.shuffle(rng);
+        self.current_draft.shuffle(&mut rng);
 
         if self.current_draft.len() <= 1 {
             return;
@@ -124,18 +122,17 @@ impl<T> ShuffleBag<T> {
     /// ```
     /// # use bevy::prelude::*;
     /// # use bevy_shuffle_bag::ShuffleBag;
-    /// let mut rng = rand::thread_rng();
-    /// let mut treasure_chest = ShuffleBag::try_new(["gold", "armor", "sword"], &mut rng).unwrap();
-    /// let loot = treasure_chest.pick(&mut rng);
+    /// let mut treasure_chest = ShuffleBag::try_new(["gold", "armor", "sword"]).unwrap();
+    /// let loot = treasure_chest.pick();
     ///
     /// // The player just reloaded from a save, so let's reset the bag.
-    /// treasure_chest.reset(&mut rng);
-    /// let new_loot = treasure_chest.pick(&mut rng);
+    /// treasure_chest.reset();
+    /// let new_loot = treasure_chest.pick();
     /// ```
-    pub fn reset(&mut self, rng: &mut impl Rng) {
+    pub fn reset(&mut self) {
         self.current_draft = vec![];
         self.last_pick = None;
-        self.shuffle_new_draft(rng);
+        self.shuffle_new_draft();
     }
 
     /// Pick an item from the bag. If the bag is empty, this will automatically shuffle a new draft.
@@ -145,16 +142,15 @@ impl<T> ShuffleBag<T> {
     /// ```
     /// # use bevy::prelude::*;
     /// # use bevy_shuffle_bag::ShuffleBag;
-    /// let mut rng = rand::thread_rng();
-    /// let mut treasure_chest = ShuffleBag::try_new(["gold", "armor", "sword"], &mut rng).unwrap();
-    /// let loot = treasure_chest.pick(&mut rng);
+    /// let mut treasure_chest = ShuffleBag::try_new(["gold", "armor", "sword"]).unwrap();
+    /// let loot = treasure_chest.pick();
     /// ```
-    pub fn pick(&mut self, rng: &mut impl Rng) -> &T {
+    pub fn pick(&mut self) -> &T {
         let pick = self.current_draft.pop().unwrap();
         self.last_pick = Some(pick);
 
         if self.current_draft.is_empty() {
-            self.shuffle_new_draft(rng);
+            self.shuffle_new_draft();
         }
 
         &self.full_collection[pick]
@@ -166,14 +162,13 @@ impl<T> ShuffleBag<T> {
     /// ```
     /// # use bevy::prelude::*;
     /// # use bevy_shuffle_bag::ShuffleBag;
-    /// let mut rng = rand::thread_rng();
-    /// let mut shop = ShuffleBag::try_new(["potion", "shield", "bow"], &mut rng).unwrap();
+    /// let mut shop = ShuffleBag::try_new(["potion", "shield", "bow"]).unwrap();
     ///
     /// // The player is browsing the shop. The shopkeeper randomly picks an item that is available for purchase.
     /// let available_purchase = shop.peek().clone();
     ///
     /// // The player likes what they see, so they buy it!
-    /// let purchased_item = shop.pick(&mut rng).clone();
+    /// let purchased_item = shop.pick().clone();
     ///
     /// assert_eq!(purchased_item, available_purchase);
     /// ```
@@ -228,27 +223,24 @@ mod tests {
 
     #[test]
     fn fails_to_create_empty_shuffle_bag() {
-        let mut rng = rand::thread_rng();
-        let bag = ShuffleBag::<usize>::try_new(vec![], &mut rng);
+        let bag = ShuffleBag::<usize>::try_new(vec![]);
         assert!(bag.is_none());
     }
 
     #[test]
     fn picks_same_item_from_singular_bag() {
-        let mut rng = rand::thread_rng();
-        let mut bag = ShuffleBag::<usize>::try_new(vec![1], &mut rng).unwrap();
+        let mut bag = ShuffleBag::<usize>::try_new(vec![1]).unwrap();
         for _ in 0..100 {
-            assert_eq!(*bag.pick(&mut rng), 1);
+            assert_eq!(*bag.pick(), 1);
         }
     }
 
     #[test]
     fn picks_all_items_from_bag() {
-        let mut rng = rand::thread_rng();
-        let mut bag = ShuffleBag::<usize>::try_new(vec![1, 2, 3], &mut rng).unwrap();
+        let mut bag = ShuffleBag::<usize>::try_new(vec![1, 2, 3]).unwrap();
         let mut picked = Vec::new();
         for _ in 0..99 {
-            let item = bag.pick(&mut rng);
+            let item = bag.pick();
             picked.push(*item);
         }
         assert_eq!(picked.len(), 99, "expected 99 items, got {}", picked.len());
@@ -262,11 +254,10 @@ mod tests {
 
     #[test]
     fn never_picks_the_same_item_twice() {
-        let mut rng = rand::thread_rng();
-        let mut bag = ShuffleBag::<usize>::try_new(vec![1, 2, 3], &mut rng).unwrap();
+        let mut bag = ShuffleBag::<usize>::try_new(vec![1, 2, 3]).unwrap();
         let mut last_pick = None;
         for _ in 0..1000 {
-            let pick = *bag.pick(&mut rng);
+            let pick = *bag.pick();
             assert_ne!(Some(pick), last_pick);
             last_pick = Some(pick);
         }
@@ -294,8 +285,7 @@ mod tests {
     #[test]
     fn is_deserialize() {
         fn accept_type<T: for<'a> Deserialize<'a>>(_: T) {}
-        let mut rng = rand::thread_rng();
-        let bag = ShuffleBag::try_new(vec![1, 2, 3], &mut rng).unwrap();
+        let bag = ShuffleBag::try_new(vec![1, 2, 3]).unwrap();
         accept_type(bag);
     }
 
@@ -313,8 +303,7 @@ mod tests {
                     #[allow(non_snake_case)]
                     fn [<is_ $name>]() {
                     fn accept_type<T: $name>(_: T) {}
-                        let mut rng = rand::thread_rng();
-                        let bag = ShuffleBag::try_new(vec![1, 2, 3], &mut rng).unwrap();
+                        let bag = ShuffleBag::try_new(vec![1, 2, 3]).unwrap();
                         accept_type(bag);
                     }
                 }
