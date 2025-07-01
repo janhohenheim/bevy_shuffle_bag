@@ -1054,13 +1054,12 @@ dependencies = [
 
 [[package]]
 name = "bevy_shuffle_bag"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "bevy",
  "paste",
  "rand",
  "serde",
- "tracing",
 ]
 
 [[package]]
