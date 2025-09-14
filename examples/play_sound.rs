@@ -25,7 +25,7 @@ struct SoundAssets {
 impl FromWorld for SoundAssets {
     fn from_world(world: &mut World) -> Self {
         let assets = world.resource::<AssetServer>();
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
         Self {
             steps: ShuffleBag::try_new(
                 vec![
@@ -48,7 +48,7 @@ fn setup(mut commands: Commands) {
 }
 
 fn play_sound(mut commands: Commands, mut sound_assets: ResMut<SoundAssets>) {
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rng();
     // Pick a sound from the shuffle bag. This is guaranteed to never pick the same sound twice in a row.
     let sound = sound_assets.steps.pick(&mut rng);
 

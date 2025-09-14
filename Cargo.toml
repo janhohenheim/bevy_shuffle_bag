@@ -1,6 +1,6 @@
 [package]
 name = "bevy_shuffle_bag"
-version = "0.2.1"
+version = "0.3.0-rc.0"
 edition = "2024"
 authors = ["Jan Hohenheim <jan@hohenheim.ch>"]
 exclude = ["./assets/"]
@@ -16,13 +16,13 @@ bevy_assets = ["bevy/bevy_asset"]
 serialize = ["dep:serde"]
 
 [dependencies]
-rand = "0.8.5"
+rand = "0.9"
 serde = { version = "1", features = ["derive"], optional = true }
 
 [dependencies.bevy]
-version = "0.16.0"
+version = "0.17.0-rc"
 default-features = false
 
 [dev-dependencies]
 paste = "1.0.15"
-bevy = { version = "0.16.0" }
+bevy = { version = "0.17.0-rc" }

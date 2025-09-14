@@ -38,7 +38,7 @@ impl<T> ShuffleBag<T> {
     /// # use bevy::prelude::*;
     /// # use std::collections::HashSet;
     /// # use bevy_shuffle_bag::ShuffleBag;
-    /// let mut rng = rand::thread_rng();
+    /// let mut rng = rand::rng();
     /// let mut possible_loot = HashSet::new();
     /// possible_loot.insert("gold");
     /// possible_loot.insert("armor");
@@ -56,7 +56,7 @@ impl<T> ShuffleBag<T> {
     /// ```
     /// # use bevy::prelude::*;
     /// # use bevy_shuffle_bag::ShuffleBag;
-    /// let mut rng = rand::thread_rng();
+    /// let mut rng = rand::rng();
     /// let treasure_chest = ShuffleBag::try_new(["gold", "armor", "sword"], &mut rng).unwrap();
     /// ```
     pub fn try_new(full_collection: impl Into<Vec<T>>, rng: &mut impl Rng) -> Option<Self> {
@@ -85,7 +85,7 @@ impl<T> ShuffleBag<T> {
     /// ```
     /// # use bevy::prelude::*;
     /// # use bevy_shuffle_bag::ShuffleBag;
-    /// let mut rng = rand::thread_rng();
+    /// let mut rng = rand::rng();
     /// let mut treasure_chest = ShuffleBag::try_new(["gold", "armor", "sword"], &mut rng).unwrap();
     /// let loot = treasure_chest.pick(&mut rng);
     ///
@@ -112,7 +112,7 @@ impl<T> ShuffleBag<T> {
 
         // Looks like we picked the same item twice in a row, so let's shuffle it into the middle of the draft.
         let max_index = self.current_draft.len() - 2;
-        let index = rng.gen_range(0..=max_index);
+        let index = rng.random_range(0..=max_index);
         // Swap the this item with the last item in the draft.
         let new_next_pick = self.current_draft.swap_remove(index);
         self.current_draft.push(new_next_pick);
@@ -124,7 +124,7 @@ impl<T> ShuffleBag<T> {
     /// ```
     /// # use bevy::prelude::*;
     /// # use bevy_shuffle_bag::ShuffleBag;
-    /// let mut rng = rand::thread_rng();
+    /// let mut rng = rand::rng();
     /// let mut treasure_chest = ShuffleBag::try_new(["gold", "armor", "sword"], &mut rng).unwrap();
     /// let loot = treasure_chest.pick(&mut rng);
     ///
@@ -145,7 +145,7 @@ impl<T> ShuffleBag<T> {
     /// ```
     /// # use bevy::prelude::*;
     /// # use bevy_shuffle_bag::ShuffleBag;
-    /// let mut rng = rand::thread_rng();
+    /// let mut rng = rand::rng();
     /// let mut treasure_chest = ShuffleBag::try_new(["gold", "armor", "sword"], &mut rng).unwrap();
     /// let loot = treasure_chest.pick(&mut rng);
     /// ```
@@ -166,7 +166,7 @@ impl<T> ShuffleBag<T> {
     /// ```
     /// # use bevy::prelude::*;
     /// # use bevy_shuffle_bag::ShuffleBag;
-    /// let mut rng = rand::thread_rng();
+    /// let mut rng = rand::rng();
     /// let mut shop = ShuffleBag::try_new(["potion", "shield", "bow"], &mut rng).unwrap();
     ///
     /// // The player is browsing the shop. The shopkeeper randomly picks an item that is available for purchase.
@@ -228,14 +228,14 @@ mod tests {
 
     #[test]
     fn fails_to_create_empty_shuffle_bag() {
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
         let bag = ShuffleBag::<usize>::try_new(vec![], &mut rng);
         assert!(bag.is_none());
     }
 
     #[test]
     fn picks_same_item_from_singular_bag() {
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
         let mut bag = ShuffleBag::<usize>::try_new(vec![1], &mut rng).unwrap();
         for _ in 0..100 {
             assert_eq!(*bag.pick(&mut rng), 1);
@@ -244,7 +244,7 @@ mod tests {
 
     #[test]
     fn picks_all_items_from_bag() {
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
         let mut bag = ShuffleBag::<usize>::try_new(vec![1, 2, 3], &mut rng).unwrap();
         let mut picked = Vec::new();
         for _ in 0..99 {
@@ -262,7 +262,7 @@ mod tests {
 
     #[test]
     fn never_picks_the_same_item_twice() {
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
         let mut bag = ShuffleBag::<usize>::try_new(vec![1, 2, 3], &mut rng).unwrap();
         let mut last_pick = None;
         for _ in 0..1000 {
@@ -294,7 +294,7 @@ mod tests {
     #[test]
     fn is_deserialize() {
         fn accept_type<T: for<'a> Deserialize<'a>>(_: T) {}
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
         let bag = ShuffleBag::try_new(vec![1, 2, 3], &mut rng).unwrap();
         accept_type(bag);
     }
@@ -313,7 +313,7 @@ mod tests {
                     #[allow(non_snake_case)]
                     fn [<is_ $name>]() {
                     fn accept_type<T: $name>(_: T) {}
-                        let mut rng = rand::thread_rng();
+                        let mut rng = rand::rng();
                         let bag = ShuffleBag::try_new(vec![1, 2, 3], &mut rng).unwrap();
                         accept_type(bag);
                     }
