@@ -89,7 +89,7 @@ See the `examples` directory for more :)
 
 | bevy        | bevy_shuffle_bag |
 |-------------|------------------|
-| 0.17.0-rc        | 0.3.0-rc              |
+| 0.17        | 0.3              |
 | 0.16        | 0.2              |
 | 0.15        | 0.1              |
 
