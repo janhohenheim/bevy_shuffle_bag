@@ -4,7 +4,7 @@
 #[cfg(feature = "bevy_assets")]
 use bevy::asset::VisitAssetDependencies;
 use bevy::prelude::*;
-use rand::{Rng, seq::SliceRandom as _};
+use rand::{Rng, RngExt as _, seq::SliceRandom as _};
 use std::{
     fmt::Debug,
     hash::{Hash, Hasher},
