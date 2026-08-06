@@ -17,9 +17,9 @@ use std::{
 /// If the bag contains no duplicates, items are always picked such that the same item is never picked twice in a row.
 ///
 /// No more playing the same sound effect or dialogue twice in a row!
-#[derive(Component, Resource, Debug, Reflect)]
+#[derive(Component, Debug, Reflect)]
 #[cfg_attr(feature = "serialize", derive(serde::Serialize, serde::Deserialize))]
-#[reflect(Component, Resource)]
+#[reflect(Component)]
 #[non_exhaustive]
 pub struct ShuffleBag<T> {
     /// The full collection of items that could be in the bag at the same time.
@@ -283,8 +283,7 @@ mod tests {
         Struct,
         TypePath,
         Typed,
-        Component,
-        Resource
+        Component
     );
 
     #[cfg(feature = "serialize")]
